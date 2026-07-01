@@ -1,0 +1,55 @@
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  
+  --color-luxury-50: #f9f9f9;
+  --color-luxury-100: #f1f0ee;
+  --color-luxury-200: #e2dfd9;
+  --color-luxury-300: #ccc7bc;
+  --color-luxury-400: #b0a797;
+  --color-luxury-500: #988e7a;
+  --color-luxury-600: #827866;
+  --color-luxury-700: #685f52;
+  --color-luxury-800: #554d45;
+  --color-luxury-900: #463f39;
+  --color-luxury-950: #26221f;
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-fade-in: fade-in 1.2s ease-out forwards;
+  --animate-slide-up: slide-up 1s ease-out forwards;
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    0% { transform: translateY(40px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-luxury-50 text-luxury-950;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-normal text-luxury-950;
+  }
+}
