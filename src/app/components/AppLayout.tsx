@@ -110,7 +110,7 @@ export default function AppLayout() {
               {/* Center: Logo */}
               <div className="flex-1 flex justify-center">
                 <Link to="/" className="text-3xl font-serif tracking-[0.25em] text-[#322D29] hover:text-[#72383D] transition-colors uppercase">
-                  Aura
+                  Novak
                 </Link>
               </div>
 
