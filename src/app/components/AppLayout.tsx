@@ -78,7 +78,19 @@ export default function AppLayout() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Track scroll position for translucent header
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   const navigate = useNavigate();
+
+  // Scroll Listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 40);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Prevent scrolling when search overlay or mobile menu is open
   useEffect(() => {
@@ -146,15 +158,24 @@ export default function AppLayout() {
         {/* ----------------------------- */}
         {/* MAIN HEADER                   */}
         {/* ----------------------------- */}
-        <header className="sticky top-0 z-50 flex flex-col w-full bg-[#EFE9E1]">
-          
-          {/* Top Announcement Bar */}
-          <div className="bg-[#322D29] text-[#EFE9E1] text-[10px] sm:text-xs text-center py-2 uppercase tracking-[0.2em] font-medium w-full">
+        <header 
+          className={`sticky top-0 z-50 flex flex-col w-full transition-all duration-500 ease-in-out ${
+            isScrolled 
+              ? "bg-[#EFE9E1]/60 backdrop-blur-xl border-b border-[#D1C7BD]/40 shadow-sm" 
+              : "bg-[#EFE9E1] border-b-transparent"
+          }`}
+        >
+          {/* Top Announcement Bar - Collapses on scroll */}
+          <div 
+            className={`bg-[#322D29] text-[#EFE9E1] text-[10px] sm:text-xs text-center uppercase tracking-[0.2em] font-medium w-full transition-all duration-500 overflow-hidden ${
+              isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-12 py-2 opacity-100"
+            }`}
+          >
             Free Shipping On Prepaid Orders | Buy Now Pay Later Options Available
           </div>
 
           {/* Main Navigation Area */}
-          <div className="w-full border-b border-[#D1C7BD] bg-[#EFE9E1]/90 backdrop-blur-md">
+          <div className={`w-full transition-all duration-500 ${isScrolled ? "bg-transparent" : "border-b border-[#D1C7BD]/50 bg-[#EFE9E1]/90"}`}>
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center h-20">
                 
@@ -225,8 +246,12 @@ export default function AppLayout() {
             </div>
           </div>
 
-          {/* Secondary Navigation Bar (Desktop Only) */}
-          <div className="hidden lg:flex w-full bg-[#EFE9E1] border-b border-[#D1C7BD]/50 justify-center">
+          {/* Secondary Navigation Bar (Desktop Only) - Collapses on scroll */}
+          <div 
+            className={`hidden lg:flex w-full justify-center transition-all duration-500 overflow-hidden ${
+              isScrolled ? "max-h-0 opacity-0 bg-transparent border-transparent" : "max-h-20 opacity-100 bg-[#EFE9E1] border-b border-[#D1C7BD]/50"
+            }`}
+          >
             <nav className="flex space-x-12 py-4">
               <Link to="/shop" className="text-xs font-bold text-[#322D29] hover:text-[#72383D] transition-colors uppercase tracking-[0.2em]">
                 All Fragrances
@@ -248,7 +273,7 @@ export default function AppLayout() {
 
           {/* Mobile Menu Overlay */}
           {isMobileMenuOpen && (
-            <div className="fixed inset-0 top-[104px] bg-[#EFE9E1] z-40 lg:hidden overflow-y-auto border-t border-[#D1C7BD]">
+            <div className={`fixed inset-0 bg-[#EFE9E1] z-40 lg:hidden overflow-y-auto border-t border-[#D1C7BD] transition-all duration-500 ${isScrolled ? "top-[80px]" : "top-[104px]"}`}>
               <nav className="flex flex-col p-6 space-y-6">
                 <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
                   All Fragrances
