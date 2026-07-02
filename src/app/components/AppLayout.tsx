@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from "react-router";
-import { ShoppingBag, Search, Menu, User as UserIcon, X } from "lucide-react";
+import { ShoppingBag, Search, Menu, User as UserIcon, X, Heart, ChevronDown } from "lucide-react";
 import { useStore } from "../../store/useStore";
 import { useState, useEffect } from "react";
 
@@ -38,7 +38,7 @@ function PageLoader() {
       <div className="relative flex flex-col items-center">
         {/* Animated Novak Text */}
         <h1 
-          className={`font-serif text-5xl md:text-7xl text-[#322D29] uppercase transition-all duration-[2000ms] ease-out ${
+          className={`font-serif text-4xl md:text-7xl text-[#322D29] uppercase transition-all duration-[2000ms] ease-out ${
             mounted ? "tracking-[0.4em] opacity-100 scale-100 ml-[0.4em]" : "tracking-[0.1em] opacity-0 scale-95"
           }`}
         >
@@ -46,7 +46,7 @@ function PageLoader() {
         </h1>
         
         {/* Elegant Thin Progress Line */}
-        <div className="w-32 h-[1px] bg-[#D1C7BD]/50 mt-8 overflow-hidden rounded-full">
+        <div className="w-24 md:w-32 h-[1px] bg-[#D1C7BD]/50 mt-6 md:mt-8 overflow-hidden rounded-full">
           <div 
             className="h-full bg-[#72383D] transition-all duration-[2000ms] ease-out"
             style={{ width: mounted ? "100%" : "0%" }}
@@ -55,7 +55,7 @@ function PageLoader() {
         
         {/* Subtitle Fade In */}
         <span 
-           className={`mt-4 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-medium text-[#AC9C8D] transition-opacity duration-1000 delay-700 ${
+           className={`mt-4 text-[8px] md:text-[10px] uppercase tracking-[0.3em] font-medium text-[#AC9C8D] transition-opacity duration-1000 delay-700 ${
              mounted ? "opacity-100" : "opacity-0"
            }`}
         >
@@ -78,28 +78,46 @@ export default function AppLayout() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Track scroll position for translucent header
-  const [isScrolled, setIsScrolled] = useState(false);
-  
+  // States for Smart Header (Hide on scroll down, show on scroll up)
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   const navigate = useNavigate();
 
-  // Scroll Listener
+  // Scroll Listener for Smart Header
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+      const currentScrollY = window.scrollY;
 
-  // Prevent scrolling when search overlay or mobile menu is open
+      // If search or mobile menu is open, always keep header visible
+      if (isSearchOpen || isMobileMenuOpen) {
+        setIsVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+
+      // Hide header if scrolling down and past 100px, otherwise show it
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, isSearchOpen, isMobileMenuOpen]);
+
+  // Prevent scrolling when mobile menu is open
   useEffect(() => {
-    if (isSearchOpen || isMobileMenuOpen) {
+    if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [isSearchOpen, isMobileMenuOpen]);
+  }, [isMobileMenuOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,108 +133,101 @@ export default function AppLayout() {
       {/* Initial Page Loader */}
       <PageLoader />
 
-      <div className="min-h-screen flex flex-col bg-[#EFE9E1] selection:bg-[#72383D] selection:text-[#EFE9E1] font-sans">
+      <div className="min-h-screen flex flex-col bg-[#EFE9E1] selection:bg-[#72383D] selection:text-[#EFE9E1] font-sans relative">
         
-        {/* ----------------------------- */}
-        {/* FULL SCREEN SEARCH OVERLAY    */}
-        {/* ----------------------------- */}
-        <div 
-          className={`fixed inset-0 bg-[#EFE9E1]/95 backdrop-blur-xl z-[100] flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${
-            isSearchOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none"
-          }`}
-        >
-          <button 
-            onClick={() => setIsSearchOpen(false)}
-            className="absolute top-8 right-8 text-[#322D29] hover:text-[#72383D] transition-colors p-2"
-          >
-            <X className="w-8 h-8" />
-          </button>
-          
-          <div className="w-full max-w-3xl px-6">
-            <p className="text-[#AC9C8D] text-sm uppercase tracking-[0.3em] font-medium mb-4 text-center">
-              What are you looking for?
-            </p>
-            <form onSubmit={handleSearchSubmit} className="relative group">
-              <input 
-                type="text" 
-                autoFocus={isSearchOpen}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search fragrances, categories..." 
-                className="w-full bg-transparent border-b-2 border-[#D1C7BD] text-3xl md:text-5xl text-[#322D29] py-4 pr-12 focus:outline-none focus:border-[#72383D] transition-colors placeholder:text-[#AC9C8D]/50 font-serif"
-              />
-              <button 
-                type="submit"
-                className="absolute right-0 bottom-6 text-[#AC9C8D] group-hover:text-[#72383D] transition-colors"
-              >
-                <Search className="w-8 h-8" />
-              </button>
-            </form>
-          </div>
-        </div>
-
         {/* ----------------------------- */}
         {/* MAIN HEADER                   */}
         {/* ----------------------------- */}
         <header 
-          className={`sticky top-0 z-50 flex flex-col w-full transition-all duration-500 ease-in-out ${
-            isScrolled 
-              ? "bg-[#EFE9E1]/60 backdrop-blur-xl border-b border-[#D1C7BD]/40 shadow-sm" 
-              : "bg-[#EFE9E1] border-b-transparent"
+          className={`w-full z-50 sticky top-0 transition-transform duration-300 ease-in-out ${
+            isVisible ? "translate-y-0" : "-translate-y-full"
           }`}
         >
-          {/* Top Announcement Bar - Collapses on scroll */}
-          <div 
-            className={`bg-[#322D29] text-[#EFE9E1] text-[10px] sm:text-xs text-center uppercase tracking-[0.2em] font-medium w-full transition-all duration-500 overflow-hidden ${
-              isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-12 py-2 opacity-100"
-            }`}
-          >
-            Free Shipping On Prepaid Orders | Buy Now Pay Later Options Available
+          {/* Top Announcement Bar - Dark Theme */}
+          <div className="bg-[#322D29] text-[#EFE9E1] text-[9px] sm:text-[10px] md:text-xs text-center uppercase tracking-[0.15em] font-semibold w-full py-2.5 px-2 leading-tight">
+            BUY ANY 8 INSPIRED PERFUMES (100ML) FOR JUST ₹7000 ✨
           </div>
 
-          {/* Main Navigation Area */}
-          <div className={`w-full transition-all duration-500 ${isScrolled ? "bg-transparent" : "border-b border-[#D1C7BD]/50 bg-[#EFE9E1]/90"}`}>
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-between items-center h-20">
+          {/* Main Navigation Area - Light Theme */}
+          <div className="w-full bg-[#EFE9E1] border-b border-[#D1C7BD]/50 shadow-sm relative z-50">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-6">
+              <div className="flex justify-between items-center relative min-h-[50px] md:min-h-[60px]">
                 
-                {/* Left Side: Mobile Menu & Search */}
-                <div className="flex items-center flex-1 justify-start space-x-4">
+                {/* Left Side: Mobile Menu & Logo */}
+                <div className="flex items-center">
                   <button 
-                    className="p-2 -ml-2 text-[#322D29] hover:text-[#72383D] transition-colors lg:hidden"
+                    className="p-1 -ml-1 mr-2 text-[#322D29] hover:text-[#72383D] transition-colors lg:hidden"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   >
                     {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                   </button>
                   
-                  <button 
-                    onClick={() => setIsSearchOpen(true)}
-                    className="text-[#322D29] hover:text-[#72383D] transition-colors flex items-center space-x-2"
-                    title="Search"
-                  >
-                    <Search className="w-5 h-5" />
-                    <span className="hidden sm:block text-xs font-semibold uppercase tracking-widest mt-0.5">Search</span>
-                  </button>
-                </div>
-
-                {/* Center: Logo */}
-                <div className="flex-1 flex justify-center">
-                  <Link to="/" className="text-3xl font-serif tracking-[0.25em] text-[#322D29] hover:text-[#72383D] transition-colors uppercase">
-                    Novak
+                  <Link to="/" className="flex flex-col items-center md:items-start text-center md:text-left group">
+                    <span className="text-xl sm:text-2xl md:text-4xl font-serif tracking-[0.25em] text-[#322D29] group-hover:text-[#72383D] transition-colors uppercase leading-none">
+                      Novak
+                    </span>
+                    <span className="text-[7px] md:text-[10px] uppercase tracking-[0.3em] font-medium text-[#AC9C8D] mt-1 md:mt-1.5 ml-0.5 md:ml-1">
+                      Perfumery
+                    </span>
                   </Link>
                 </div>
 
-                {/* Right Side: Account & Cart */}
-                <div className="flex items-center justify-end flex-1 space-x-5 sm:space-x-8">
+                {/* Center: Inline Search Bar (Toggled) */}
+                {isSearchOpen && (
+                  <div className="flex flex-1 flex-col justify-center items-center px-4 md:px-12 absolute inset-0 z-10 w-full bg-[#EFE9E1]">
+                    <form onSubmit={handleSearchSubmit} className="relative w-full max-w-2xl bg-[#EFE9E1]">
+                      <input 
+                        type="text" 
+                        autoFocus
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search for fragrances..." 
+                        className="w-full bg-[#EFE9E1] border border-[#322D29] text-[#322D29] py-2 md:py-2.5 px-3 md:px-4 rounded-[2px] pr-10 focus:outline-none focus:border-[#72383D] focus:ring-1 focus:ring-[#72383D] transition-all placeholder:text-[#AC9C8D] text-sm md:text-base"
+                      />
+                      <button 
+                        type="submit"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#322D29] hover:text-[#72383D] transition-colors"
+                      >
+                        <Search className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
+                    </form>
+                    <div className="mt-2 md:mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] md:text-sm text-[#322D29]">
+                      <span className="text-[#AC9C8D] hidden sm:block">Popular Searches:</span>
+                      <Link to="/shop?search=solid" className="underline hover:text-[#72383D] transition-colors decoration-[#D1C7BD] underline-offset-4">Solid</Link>
+                      <Link to="/shop?search=luxe" className="underline hover:text-[#72383D] transition-colors decoration-[#D1C7BD] underline-offset-4">Luxe</Link>
+                      <Link to="/shop?search=inspired" className="underline hover:text-[#72383D] transition-colors decoration-[#D1C7BD] underline-offset-4">Inspired</Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* Right Side: Account, Wishlist & Cart */}
+                <div className={`flex items-center justify-end space-x-3 sm:space-x-5 md:space-x-6 z-20 bg-[#EFE9E1] ${isSearchOpen ? 'pl-2' : ''}`}>
                   
+                  {/* Search Toggle (Hidden when active) */}
+                  {!isSearchOpen && (
+                    <button 
+                      onClick={() => setIsSearchOpen(true)}
+                      className="text-[#322D29] hover:text-[#72383D] transition-colors flex items-center space-x-2 p-1"
+                      title="Search"
+                    >
+                      <span className="hidden lg:block text-xs font-semibold uppercase tracking-widest mt-0.5">Search</span>
+                      <Search className="w-5 h-5 md:w-5 md:h-5" />
+                    </button>
+                  )}
+
+                  {!isSearchOpen && <div className="hidden lg:block h-6 w-[1px] bg-[#D1C7BD] mx-2"></div>}
+                  {isSearchOpen && (
+                     <button onClick={() => setIsSearchOpen(false)} className="lg:hidden text-[#322D29] p-1 ml-2"><X className="w-5 h-5"/></button>
+                  )}
+
                   {/* User Account */}
                   <div className="relative hidden sm:block">
                     <button 
-                      className={`flex items-center space-x-2 focus:outline-none transition-colors ${isUserMenuOpen ? 'text-[#72383D]' : 'text-[#322D29] hover:text-[#72383D]'}`}
+                      className={`flex items-center space-x-2 p-1 focus:outline-none transition-colors ${isUserMenuOpen ? 'text-[#72383D]' : 'text-[#322D29] hover:text-[#72383D]'}`}
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                       title="Account"
                     >
                       <UserIcon className="w-5 h-5" />
-                      <span className="text-xs font-semibold uppercase tracking-widest mt-0.5">Account</span>
                     </button>
 
                     {isUserMenuOpen && (
@@ -224,19 +235,23 @@ export default function AppLayout() {
                         <Link to="/orders" className="block px-5 py-3 text-sm font-medium text-[#322D29] hover:bg-[#D1C7BD]/30 hover:text-[#72383D] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           My Orders
                         </Link>
-                        <Link to="#" className="block px-5 py-3 text-sm font-medium text-[#322D29] hover:bg-[#D1C7BD]/30 hover:text-[#72383D] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                        <Link to="/profile" className="block px-5 py-3 text-sm font-medium text-[#322D29] hover:bg-[#D1C7BD]/30 hover:text-[#72383D] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           Profile
                         </Link>
                       </div>
                     )}
                   </div>
 
+                  {/* Wishlist Icon */}
+                  <Link to="/wishlist" className="text-[#322D29] hover:text-[#72383D] transition-colors flex items-center p-1">
+                    <Heart className="w-5 h-5" />
+                  </Link>
+
                   {/* Cart Icon */}
-                  <Link to="/cart" className="relative text-[#322D29] hover:text-[#72383D] transition-colors flex items-center space-x-2 group">
+                  <Link to="/cart" className="relative text-[#322D29] hover:text-[#72383D] transition-colors flex items-center group p-1">
                     <ShoppingBag className="w-5 h-5" />
-                    <span className="hidden sm:block text-xs font-semibold uppercase tracking-widest mt-0.5">Cart</span>
                     {cartCount > 0 && (
-                      <span className="absolute -top-1.5 -right-2 sm:-right-3 bg-[#72383D] text-[#EFE9E1] text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                      <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-[#72383D] text-[#EFE9E1] text-[8px] md:text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm group-hover:scale-110 transition-transform">
                         {cartCount}
                       </span>
                     )}
@@ -246,50 +261,76 @@ export default function AppLayout() {
             </div>
           </div>
 
-          {/* Secondary Navigation Bar (Desktop Only) - Collapses on scroll */}
-          <div 
-            className={`hidden lg:flex w-full justify-center transition-all duration-500 overflow-hidden ${
-              isScrolled ? "max-h-0 opacity-0 bg-transparent border-transparent" : "max-h-20 opacity-100 bg-[#EFE9E1] border-b border-[#D1C7BD]/50"
-            }`}
-          >
-            <nav className="flex space-x-12 py-4">
-              <Link to="/shop" className="text-xs font-bold text-[#322D29] hover:text-[#72383D] transition-colors uppercase tracking-[0.2em]">
-                All Fragrances
-              </Link>
-              <Link to="/shop?category=men" className="text-xs font-bold text-[#322D29] hover:text-[#72383D] transition-colors uppercase tracking-[0.2em]">
-                For Him
-              </Link>
-              <Link to="/shop?category=women" className="text-xs font-bold text-[#322D29] hover:text-[#72383D] transition-colors uppercase tracking-[0.2em]">
-                For Her
-              </Link>
-              <Link to="/shop?category=unisex" className="text-xs font-bold text-[#322D29] hover:text-[#72383D] transition-colors uppercase tracking-[0.2em]">
-                Unisex
-              </Link>
-              <Link to="/shop?collection=gift-sets" className="text-xs font-bold text-[#72383D] hover:text-[#322D29] transition-colors uppercase tracking-[0.2em]">
-                Gift Sets
-              </Link>
-            </nav>
+          {/* Secondary Navigation Bar (Desktop Only) - Dark Theme with CORRECTED LINKS */}
+          <div className="hidden lg:block w-full bg-[#322D29] shadow-md relative z-40">
+            <div className="max-w-[1400px] mx-auto px-4 py-4">
+              <nav className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4">
+                <Link to="/shop?tag=deals" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  Deals <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+                <Link to="/shop?collection=elite-edition" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Elite Edition
+                </Link>
+                <Link to="/shop" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Find Your Fragrance
+                </Link>
+                <Link to="/shop?tag=new-arrival" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  New Arrival <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+                <Link to="/shop?collection=collaboration" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Collaboration
+                </Link>
+                <Link to="/shop?collection=niche-edition" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Niche Edition
+                </Link>
+                <Link to="/shop?collection=luxe-edition" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Luxe Edition
+                </Link>
+                <Link to="/shop?collection=gift-sets" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  Gift Sets
+                </Link>
+              </nav>
+              
+              {/* Second Row Navigation */}
+              <nav className="flex flex-wrap justify-center items-center gap-x-10 mt-5 mb-1">
+                <Link to="/shop?category=inspired" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  Inspired Perfumes <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+                <Link to="/shop?category=byob" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest">
+                  BYOB
+                </Link>
+                <Link to="/shop?category=lotion-body-wash" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  Lotion & Body Wash <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+                <Link to="/shop" className="text-xs font-bold text-[#EFE9E1] hover:text-[#AC9C8D] transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  More <ChevronDown className="w-3.5 h-3.5" />
+                </Link>
+              </nav>
+            </div>
           </div>
 
           {/* Mobile Menu Overlay */}
           {isMobileMenuOpen && (
-            <div className={`fixed inset-0 bg-[#EFE9E1] z-40 lg:hidden overflow-y-auto border-t border-[#D1C7BD] transition-all duration-500 ${isScrolled ? "top-[80px]" : "top-[104px]"}`}>
+            <div className="absolute top-full left-0 right-0 w-full bg-[#EFE9E1] z-40 lg:hidden overflow-y-auto border-t border-[#D1C7BD] shadow-inner h-[calc(100vh-70px)]">
               <nav className="flex flex-col p-6 space-y-6">
-                <Link to="/shop" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
-                  All Fragrances
+                <Link to="/shop?tag=deals" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
+                  Deals
                 </Link>
-                <Link to="/shop?category=men" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
-                  For Him
+                <Link to="/shop?collection=elite-edition" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
+                  Elite Edition
                 </Link>
-                <Link to="/shop?category=women" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
-                  For Her
+                <Link to="/shop?category=inspired" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#322D29] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
+                  Inspired Perfumes
                 </Link>
                 <Link to="/shop?collection=gift-sets" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-serif text-[#72383D] uppercase tracking-widest border-b border-[#D1C7BD]/30 pb-4">
                   Gift Sets
                 </Link>
-                <div className="pt-4 flex space-x-6">
+                <div className="pt-4 flex flex-col space-y-6">
                   <Link to="/orders" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center text-sm font-bold uppercase tracking-widest text-[#322D29]">
-                    <UserIcon className="w-5 h-5 mr-2" /> Orders
+                    <UserIcon className="w-5 h-5 mr-3 text-[#AC9C8D]" /> My Orders
+                  </Link>
+                  <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center text-sm font-bold uppercase tracking-widest text-[#322D29]">
+                    <UserIcon className="w-5 h-5 mr-3 text-[#AC9C8D]" /> Profile
                   </Link>
                 </div>
               </nav>
@@ -307,15 +348,15 @@ export default function AppLayout() {
         {/* ----------------------------- */}
         {/* FOOTER                        */}
         {/* ----------------------------- */}
-        <footer className="bg-[#322D29] text-[#AC9C8D] py-16 border-t border-[#322D29]">
+        <footer className="bg-[#322D29] text-[#AC9C8D] py-12 md:py-16 border-t border-[#322D29]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p className="font-serif text-3xl text-[#EFE9E1] mb-8 uppercase tracking-[0.2em]">Novak</p>
-            <div className="flex justify-center space-x-8 mb-10 text-sm font-medium tracking-wider uppercase">
-              <Link to="#" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">About Us</Link>
-              <Link to="#" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">Contact</Link>
-              <Link to="/admin" className="hover:text-[#EFE9E1] hover:scale-105 transition-all border-l border-[#AC9C8D]/40 pl-8">Admin Panel</Link>
+            <p className="font-serif text-2xl md:text-3xl text-[#EFE9E1] mb-6 md:mb-8 uppercase tracking-[0.2em]">Novak</p>
+            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 mb-8 md:mb-10 text-xs md:text-sm font-medium tracking-wider uppercase">
+              <Link to="/about" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">About Us</Link>
+              <Link to="/contact" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">Contact</Link>
+              <Link to="/admin" className="hover:text-[#EFE9E1] hover:scale-105 transition-all sm:border-l border-[#AC9C8D]/40 sm:pl-8">Admin Panel</Link>
             </div>
-            <p className="text-xs tracking-widest text-[#AC9C8D]/70">&copy; {new Date().getFullYear()} Novak Perfumes. All rights reserved.</p>
+            <p className="text-[10px] md:text-xs tracking-widest text-[#AC9C8D]/70">&copy; {new Date().getFullYear()} Novak Perfumes. All rights reserved.</p>
           </div>
         </footer>
       </div>
