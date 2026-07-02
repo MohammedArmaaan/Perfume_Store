@@ -47,6 +47,11 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
 // -------------------------------------------------------------
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // 👉 UPDATE: Do alag refs banaye hain dono lines ke liye
+  const bestSellersRef1 = useRef<HTMLDivElement>(null);
+  const bestSellersRef2 = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const { data: products, isLoading: loadingProducts } = useQuery({
     queryKey: ['products', 'all'],
@@ -56,11 +61,16 @@ export default function HomePage() {
     }
   });
 
-  // Fallback empty arrays if products are loading
-  const bestSellers = products?.slice(0, 4) || [];
-  const blends = products?.slice(4, 8) || [];
-  const mensCollection = products?.slice(8, 11) || [];
-  const gifting = products?.slice(12, 16) || [];
+  // Data Arrays
+  const bestSellers = products?.slice(0, 24) || [];
+  
+  // 👉 UPDATE: Best sellers ko 2 arrays me split kiya (12-12 items)
+  const bestSellersRow1 = bestSellers.slice(0, 12);
+  const bestSellersRow2 = bestSellers.slice(12, 24);
+
+  const blends = products?.slice(24, 28) || [];
+  const mensCollection = products?.slice(28, 31) || [];
+  const gifting = products?.slice(32, 36) || [];
 
   // Hero Banners Data
   const heroBanners = [
@@ -99,23 +109,45 @@ export default function HomePage() {
     }
   ];
 
+  // 👉 UPDATE: Auto-scroll logic modified to handle both lines independently
+  useEffect(() => {
+    if (isPaused || bestSellers.length === 0) return;
+
+    const scrollInterval = setInterval(() => {
+      const scrollStep = window.innerWidth > 768 ? 320 : window.innerWidth * 0.8;
+
+      [bestSellersRef1, bestSellersRef2].forEach((ref) => {
+        if (ref.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+          
+          if (scrollLeft + clientWidth >= scrollWidth - 10) {
+            ref.current.scrollTo({ left: 0, behavior: "smooth" });
+          } else {
+            ref.current.scrollBy({ left: scrollStep, behavior: "smooth" });
+          }
+        }
+      });
+    }, 3500); 
+
+    return () => clearInterval(scrollInterval);
+  }, [isPaused, bestSellers.length]);
+
   // Auto-scroll logic for Hero Banner
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroBanners.length);
-    }, 6000); // Changes slide every 6 seconds
+    }, 6000); 
     return () => clearInterval(timer);
   }, [heroBanners.length]);
 
   return (
     <div className="w-full bg-[#EFE9E1] text-[#322D29] selection:bg-[#72383D] selection:text-[#EFE9E1] overflow-x-hidden">
       
-      {/* 1. TOP PROMO BANNER (Auto-Scrolling Slider) */}
+      {/* 1. TOP PROMO BANNER */}
       <FadeIn>
         <section className="relative w-full h-[75vh] md:h-[70vh] overflow-hidden bg-[#322D29]">
           {heroBanners.map((banner, index) => {
             const isActive = index === currentSlide;
-            
             return (
               <div 
                 key={banner.id}
@@ -123,7 +155,7 @@ export default function HomePage() {
                   isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                 }`}
               >
-                {/* Background Image with Cinematic Zoom */}
+                {/* Background Image */}
                 <div className="absolute inset-0 overflow-hidden bg-[#322D29]">
                   <img 
                     src={banner.image} 
@@ -137,37 +169,18 @@ export default function HomePage() {
                 
                 {/* Staggered Text Content */}
                 <div className="relative z-10 left-6 md:left-24 max-w-[85%] md:max-w-xl mt-20 md:mt-0 text-center md:text-left mx-auto md:mx-0">
-                  <span 
-                    className={`text-[#D1C7BD] text-[10px] md:text-sm uppercase tracking-[0.3em] font-semibold mb-3 md:mb-4 block transition-all duration-700 ease-out ${
-                      isActive ? "translate-y-0 opacity-100 delay-300" : "translate-y-4 opacity-0 delay-0"
-                    }`}
-                  >
+                  <span className={`text-[#D1C7BD] text-[10px] md:text-sm uppercase tracking-[0.3em] font-semibold mb-3 md:mb-4 block transition-all duration-700 ease-out ${isActive ? "translate-y-0 opacity-100 delay-300" : "translate-y-4 opacity-0 delay-0"}`}>
                     {banner.span}
                   </span>
-                  <h1 
-                    className={`text-5xl md:text-7xl font-serif text-[#EFE9E1] mb-3 md:mb-2 leading-tight transition-all duration-700 ease-out ${
-                      isActive ? "translate-y-0 opacity-100 delay-500" : "translate-y-4 opacity-0 delay-0"
-                    }`}
-                  >
+                  <h1 className={`text-5xl md:text-7xl font-serif text-[#EFE9E1] mb-3 md:mb-2 leading-tight transition-all duration-700 ease-out ${isActive ? "translate-y-0 opacity-100 delay-500" : "translate-y-4 opacity-0 delay-0"}`}>
                     {banner.titleMain} <br className="hidden md:block" />
                     <span className="text-[#AC9C8D] md:block">{banner.titleHighlight}</span>
                   </h1>
-                  <p 
-                    className={`text-[#D1C7BD] text-sm md:text-lg mb-8 font-light tracking-wide transition-all duration-700 ease-out ${
-                      isActive ? "translate-y-0 opacity-100 delay-700" : "translate-y-4 opacity-0 delay-0"
-                    }`}
-                  >
+                  <p className={`text-[#D1C7BD] text-sm md:text-lg mb-8 font-light tracking-wide transition-all duration-700 ease-out ${isActive ? "translate-y-0 opacity-100 delay-700" : "translate-y-4 opacity-0 delay-0"}`}>
                     {banner.subtitlePrefix} <span className="font-semibold text-[#EFE9E1] block md:inline mt-1 md:mt-0">{banner.subtitleHighlight}</span>
                   </p>
-                  <div 
-                    className={`transition-all duration-700 ease-out ${
-                      isActive ? "translate-y-0 opacity-100 delay-1000" : "translate-y-4 opacity-0 delay-0"
-                    }`}
-                  >
-                    <Link 
-                      to={banner.link} 
-                      className="inline-block bg-[#EFE9E1] text-[#322D29] px-8 py-3.5 text-xs md:text-sm uppercase tracking-widest font-bold hover:bg-[#D1C7BD] transition-all"
-                    >
+                  <div className={`transition-all duration-700 ease-out ${isActive ? "translate-y-0 opacity-100 delay-1000" : "translate-y-4 opacity-0 delay-0"}`}>
+                    <Link to={banner.link} className="inline-block bg-[#EFE9E1] text-[#322D29] px-8 py-3.5 text-xs md:text-sm uppercase tracking-widest font-bold hover:bg-[#D1C7BD] transition-all">
                       {banner.cta}
                     </Link>
                   </div>
@@ -192,25 +205,60 @@ export default function HomePage() {
         </section>
       </FadeIn>
 
-      {/* 2. BEST SELLERS GRID */}
+      {/* 👉 UPDATE: 2. BEST SELLERS SCROLLING GRID (2 SEPARATE LINES) */}
       <section className="py-12 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
         <FadeIn>
           <SectionHeader title="Best Sellers" link="/shop" />
+          
           {loadingProducts ? (
-            <div className="flex md:grid overflow-x-auto md:overflow-visible gap-4 md:grid-cols-4 md:gap-6 hide-scrollbar">
-              <SkeletonGrid count={4} />
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4 md:gap-6 overflow-x-auto hide-scrollbar pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <SkeletonGrid count={4} itemClassName="w-[80vw] sm:w-[45vw] md:w-[280px] lg:w-[300px]" />
+              </div>
+              <div className="flex gap-4 md:gap-6 overflow-x-auto hide-scrollbar pb-6 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <SkeletonGrid count={4} itemClassName="w-[80vw] sm:w-[45vw] md:w-[280px] lg:w-[300px]" />
+              </div>
             </div>
           ) : (
-            <div className="flex overflow-x-auto md:grid md:grid-cols-4 gap-4 md:gap-6 pb-6 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {bestSellers.map((p, i) => (
-                <div key={p.id} className="w-[80vw] sm:w-[45vw] md:w-auto flex-shrink-0 snap-start">
-                  <FadeIn delay={i * 100}><ProductCard product={p} badge="Bestseller" /></FadeIn>
-                </div>
-              ))}
+            <div 
+              onMouseEnter={() => setIsPaused(true)}  
+              onMouseLeave={() => setIsPaused(false)} 
+              onTouchStart={() => setIsPaused(true)}  
+              onTouchEnd={() => setIsPaused(false)}
+              className="flex flex-col gap-6"
+            >
+              {/* ROW 1 */}
+              <div 
+                ref={bestSellersRef1}
+                className="flex gap-4 md:gap-6 pb-2 -mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+              >
+                {bestSellersRow1.map((p, i) => (
+                  <div key={p.id} className="w-[80vw] sm:w-[45vw] md:w-[280px] lg:w-[300px] flex-shrink-0 snap-start">
+                    <FadeIn delay={(i % 4) * 100}>
+                      <ProductCard product={p} badge="Bestseller" />
+                    </FadeIn>
+                  </div>
+                ))}
+              </div>
+
+              {/* ROW 2 */}
+              <div 
+                ref={bestSellersRef2}
+                className="flex gap-4 md:gap-6 pb-6 -mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth"
+              >
+                {bestSellersRow2.map((p, i) => (
+                  <div key={p.id} className="w-[80vw] sm:w-[45vw] md:w-[280px] lg:w-[300px] flex-shrink-0 snap-start">
+                    <FadeIn delay={(i % 4) * 100}>
+                      <ProductCard product={p} badge="Bestseller" />
+                    </FadeIn>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </FadeIn>
       </section>
+
       {/* 9. INSTAGRAM REELS TESTIMONIAL SECTION */}
       <InstagramReelsSection />
 
@@ -224,7 +272,7 @@ export default function HomePage() {
                 { name: "For Him", img: "https://images.unsplash.com/photo-1591892212776-a09de24dbe84?auto=format&fit=crop&q=80&w=800" },
                 { name: "For Her", img: "https://images.unsplash.com/photo-1611242956059-53e4c29e6b22?auto=format&fit=crop&q=80&w=800" },
                 { name: "Unisex", img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800" },
-                { name: "Signatures", img: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600" }
+                { name: "Signatures", img: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600" },
               ].map((cat, i) => (
                 <FadeIn key={i} delay={i * 150}>
                   <Link to="/shop" className="block relative aspect-[4/5] md:aspect-[3/4] group overflow-hidden border border-[#D1C7BD]">
@@ -339,7 +387,6 @@ export default function HomePage() {
             <SectionHeader title="Men's Collection" link="/shop?category=men" />
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               
-              {/* Feature Banner */}
               <div className="lg:col-span-1 relative group overflow-hidden border border-[#D1C7BD] h-[300px] md:min-h-[400px]">
                 <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800" alt="Men's Fragrance" className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#322D29]/90 to-transparent"></div>
@@ -351,7 +398,6 @@ export default function HomePage() {
                 </div>
               </div>
               
-              {/* Product Horizontal Scroll (Mobile) / Grid (Desktop) */}
               <div className="lg:col-span-3 flex overflow-x-auto md:grid md:grid-cols-3 gap-4 md:gap-6 pb-6 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {loadingProducts ? (
                   <SkeletonGrid count={3} />
@@ -370,36 +416,6 @@ export default function HomePage() {
           </FadeIn>
         </div>
       </section>
-
-      {/* 8. MOST WISHED FILTERS */}
-      {/* <section className="py-12 md:py-20 bg-[#EFE9E1]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn>
-            <SectionHeader title="Mood & Atmosphere" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-              {[
-                { name: "Woody & Amber", img: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=800" },
-                { name: "Fresh Citrus", img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800" },
-                { name: "Spicy Oriental", img: "https://images.unsplash.com/photo-1611242956059-53e4c29e6b22?auto=format&fit=crop&q=80&w=800" },
-                { name: "Floral Musk", img: "https://images.unsplash.com/photo-1591892212776-a09de24dbe84?auto=format&fit=crop&q=80&w=800" }
-              ].map((mood, i) => (
-                <FadeIn key={i} delay={i * 150}>
-                  <Link to="/shop" className="block relative aspect-square group overflow-hidden border border-[#D1C7BD]">
-                    <img src={mood.img} alt={mood.name} className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-[#322D29]/40 group-hover:bg-[#322D29]/20 transition-colors duration-500"></div>
-                    <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
-                      <h3 className="text-base md:text-2xl text-center font-serif text-[#EFE9E1] tracking-widest">{mood.name}</h3>
-                    </div>
-                  </Link>
-                </FadeIn>
-              ))}
-            </div>
-          </FadeIn>
-        </div>
-      </section> */}
-
-      {/* 9. INSTAGRAM REELS TESTIMONIAL SECTION
-      <InstagramReelsSection /> */}
 
       {/* 10. GIFTING SECTION */}
       <section className="py-12 md:py-20 bg-[#D9D9D9]">
@@ -512,11 +528,11 @@ function SectionHeader({ title, link }: { title: string, link?: string }) {
 // -------------------------------------------------------------
 // Helper Component: Skeleton Loading Grid
 // -------------------------------------------------------------
-function SkeletonGrid({ count }: { count: number }) {
+function SkeletonGrid({ count, itemClassName }: { count: number, itemClassName?: string }) {
   return (
     <>
       {[...Array(count)].map((_, i) => (
-        <div key={i} className="w-[80vw] sm:w-[45vw] md:w-full flex-shrink-0 flex flex-col">
+        <div key={i} className={`flex-shrink-0 flex flex-col ${itemClassName || "w-[80vw] sm:w-[45vw] md:w-full"}`}>
           <div className="w-full aspect-square bg-[#D1C7BD]/40 animate-pulse border border-[#AC9C8D]/20 mb-4"></div>
           <div className="h-4 bg-[#D1C7BD]/40 w-3/4 mb-2 animate-pulse"></div>
           <div className="h-3 bg-[#D1C7BD]/40 w-1/2 mb-4 animate-pulse"></div>

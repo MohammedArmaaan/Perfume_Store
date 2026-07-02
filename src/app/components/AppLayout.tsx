@@ -42,7 +42,7 @@ function PageLoader() {
             mounted ? "tracking-[0.4em] opacity-100 scale-100 ml-[0.4em]" : "tracking-[0.1em] opacity-0 scale-95"
           }`}
         >
-          Novak
+          Novaq
         </h1>
         
         {/* Elegant Thin Progress Line */}
@@ -164,7 +164,7 @@ export default function AppLayout() {
                   
                   <Link to="/" className="flex flex-col items-center md:items-start text-center md:text-left group">
                     <span className="text-xl sm:text-2xl md:text-4xl font-serif tracking-[0.25em] text-[#322D29] group-hover:text-[#72383D] transition-colors uppercase leading-none">
-                      Novak
+                      Novaq
                     </span>
                     <span className="text-[7px] md:text-[10px] uppercase tracking-[0.3em] font-medium text-[#AC9C8D] mt-1 md:mt-1.5 ml-0.5 md:ml-1">
                       Perfumery
@@ -350,13 +350,13 @@ export default function AppLayout() {
         {/* ----------------------------- */}
         <footer className="bg-[#322D29] text-[#AC9C8D] py-12 md:py-16 border-t border-[#322D29]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p className="font-serif text-2xl md:text-3xl text-[#EFE9E1] mb-6 md:mb-8 uppercase tracking-[0.2em]">Novak</p>
+            <p className="font-serif text-2xl md:text-3xl text-[#EFE9E1] mb-6 md:mb-8 uppercase tracking-[0.2em]">Novaq</p>
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8 mb-8 md:mb-10 text-xs md:text-sm font-medium tracking-wider uppercase">
               <Link to="/about" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">About Us</Link>
               <Link to="/contact" className="hover:text-[#EFE9E1] hover:scale-105 transition-all">Contact</Link>
               <Link to="/admin" className="hover:text-[#EFE9E1] hover:scale-105 transition-all sm:border-l border-[#AC9C8D]/40 sm:pl-8">Admin Panel</Link>
             </div>
-            <p className="text-[10px] md:text-xs tracking-widest text-[#AC9C8D]/70">&copy; {new Date().getFullYear()} Novak Perfumes. All rights reserved.</p>
+            <p className="text-[10px] md:text-xs tracking-widest text-[#AC9C8D]/70">&copy; {new Date().getFullYear()} Novaq Perfumes. All rights reserved.</p>
           </div>
         </footer>
       </div>
