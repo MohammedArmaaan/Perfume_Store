@@ -339,7 +339,7 @@ export default function HomePage() {
               
               {/* Feature Banner */}
               <div className="lg:col-span-1 relative group overflow-hidden border border-[#D1C7BD] h-[300px] md:min-h-[400px]">
-                <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=800" alt="Men's Fragrance" className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
+                <img src="https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800" alt="Men's Fragrance" className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#322D29]/90 to-transparent"></div>
                 <div className="absolute bottom-6 left-6">
                   <h3 className="text-xl md:text-2xl font-serif text-[#EFE9E1] mb-2">The Alpha</h3>
