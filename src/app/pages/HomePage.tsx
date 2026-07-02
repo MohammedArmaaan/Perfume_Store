@@ -132,7 +132,7 @@ export default function HomePage() {
                       isActive ? "scale-105 opacity-70" : "scale-100 opacity-0"
                     }`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#322D29]/95 via-[#322D29]/60 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r to-transparent"></div>
                 </div>
                 
                 {/* Staggered Text Content */}
@@ -211,6 +211,8 @@ export default function HomePage() {
           )}
         </FadeIn>
       </section>
+      {/* 9. INSTAGRAM REELS TESTIMONIAL SECTION */}
+      <InstagramReelsSection />
 
       {/* 3. CURATED COLLECTIONS */}
       <section className="py-12 md:py-16 bg-[#D9D9D9]">
@@ -370,7 +372,7 @@ export default function HomePage() {
       </section>
 
       {/* 8. MOST WISHED FILTERS */}
-      <section className="py-12 md:py-20 bg-[#EFE9E1]">
+      {/* <section className="py-12 md:py-20 bg-[#EFE9E1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <SectionHeader title="Mood & Atmosphere" />
@@ -394,10 +396,10 @@ export default function HomePage() {
             </div>
           </FadeIn>
         </div>
-      </section>
+      </section> */}
 
-      {/* 9. INSTAGRAM REELS TESTIMONIAL SECTION */}
-      <InstagramReelsSection />
+      {/* 9. INSTAGRAM REELS TESTIMONIAL SECTION
+      <InstagramReelsSection /> */}
 
       {/* 10. GIFTING SECTION */}
       <section className="py-12 md:py-20 bg-[#D9D9D9]">
@@ -420,7 +422,6 @@ export default function HomePage() {
           </FadeIn>
         </div>
       </section>
-
     </div>
   );
 }
